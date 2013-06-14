@@ -1,0 +1,24 @@
+@charset "utf-8";
+#TheImageModulePreviewWin {
+	top:-9999em;
+	left:-9999em;
+	min-height:10px;
+	min-width:10px;
+	position:absolute;
+	z-index:9999;
+	background:rgba(255,255,255,.75);
+	border:1px solid #333;
+	border-radius:5px;
+	padding:20px;
+	box-shadow:rgba(0,0,0,0.4) 0 0 10px;
+}
+#TheImageModulePreviewWin em {
+	position:absolute;
+	top:0;
+	right:5px;
+	font-size:12px;
+	color:#333;
+	font-weight:bold;
+	font-style:normal;
+	cursor:pointer;
+}

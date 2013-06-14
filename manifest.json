@@ -1,0 +1,68 @@
+{
+	"name":"奇怪的工具箱"
+	,"version":"2013.3.31.0"
+	,"manifest_version":2
+	,"description":"奇怪的东西合集"
+	,"browser_action":{
+		"default_icon":"resources/images/icon48.png"
+		,"default_popup":"index.html"
+	}
+	,"icons": {
+		"16":"resources/images/icon16.png"
+		,"48":"resources/images/icon48.png"
+	}
+	// ,"default_locale":"cn"
+	// ,"options_page":"pages/options.html"
+	,"permissions":[
+		"notifications"
+		,"contextMenus"
+		,"downloads"
+		,"tabs"
+		,"http://*/*"
+		,"https://*/*"
+	]
+	,"background":{
+		/*"scripts":[
+			"modules/util.js"
+			,"modules/db.js"
+			,"core/backconfig.js"
+			,"core/backcore.js"
+			,"modules/backgrounds/init.js"
+			// "libs/seajs/sea.js"
+			// ,"modules/background_boot.js"
+		]
+		,"persistent":false*/
+		"page":"pages/background.html"
+	}
+	/*,"chrome_url_overrides" : {
+		"newtab":"pages/previewpage.html"
+	}*/
+	,"web_accessible_resources":[
+		"templates/claw.html"
+	]
+	,"content_scripts":[
+		{
+			"matches":[
+				// "*://*/*"
+				"*://*.dev/*"
+				,"*://*.bbspink.com/*"
+				,"*://g-pic.net/search/*"
+				// ct
+				,"*://www.400gb.com/*"
+				// jk
+				,"*://206.108.51.35/*"
+				// cl
+				,"*://184.154.128.246/*"
+			]
+			,"css":[
+				"resources/css/injection.css"
+			]
+			,"run_at":"document_start"
+			,"js":[
+				"libs/jquery/1.9.1.js"
+				,"modules/util.js"
+				,"modules/injection/claw.js"
+			]
+		}
+	]
+}

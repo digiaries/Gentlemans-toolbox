@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<style>
+body {font-size: 13px;color:#333;}
+.theShower {width:400px;}
+.theShower div {margin:10px;}
+.theShower textarea {font-family:Arial,sans-serif;color:#333;width:365px;height:105px;resize:none;border:#ccc 1px solid;box-shadow:rgba(0,0,0,.1) 1px 1px 5px inset,rgba(0, 0, 0, .1.5) 0 2px 3px;padding:.5em;font-size:1.2em;line-height:1.5em;-webkit-transition:all .3s ease-in-out;}
+.theShower textarea:focus {outline:none;border:#40ACE2 1px solid;box-shadow:rgba(64, 172, 226, .2) 1px 1px 5px inset,rgba(0, 0, 0, .2) 0 2px 3px;}
+.theShower textarea::-webkit-scrollbar{width:10px;height:30px;background-color:#B3DEEC;box-shadow:rgba(0, 0, 0, 0.1) 0 0 9px inset;}
+.theShower textarea::-webkit-scrollbar:hover{background-color:#91D2E7;}
+.theShower textarea::-webkit-scrollbar-thumb{-webkit-border-radius:4px;background-color:#5D91C9;}
+.theShower textarea::-webkit-scrollbar-thumb:hover{background-color:#5D91C9;}
+.theShower textarea::-webkit-scrollbar-thumb:active{background-color:#5D91C9;}
+.theShower textarea::-webkit-input-placeholder { color:#ccc;font-size:1.5em;line-height:1.5em;} 
+.theShower input ,.theShower input[type="radio"]:checked + label ,.theShower input[type="radio"] + label {background:#f2f2f2;color:#333;border: 1px solid #EEE;padding: 3px 7px 3px 7px;border-radius:5px;-webkit-transition:all .2s ease-in-out;}
+.theShower input[type="radio"]{display:none;}
+.theShower input[type="radio"] + label {display:inline-block;width:60px;text-align:center;cursor:pointer;}
+.theShower input[type="radio"]:checked + label {background:#6cf;color:#fff;cursor:default;}
+.theShower input:nth-last-child(2) {margin:0 .5em 0 0;background:#6cf;color:#fff;}
+.theShower input[type="button"] {cursor:pointer;}
+.theShower p {margin:.5em 0;}
+.theShower label {color:#999;}
+.theShower h2 {margin:0 0 .2em 1.2em;color:#666;/*padding:0 0 0 52px;background:url(images/icon.png) 0 0 no-repeat;*/height:30px;line-height:30px;text-shadow:rgba(0,0,0,.2) 1px 2px 3px;display:inline-block;position:relative;}
+.theShower h2:after {content:" ";display:block;background:-webkit-gradient(linear,0 0,100% 0,from(#6CF),color-stop(90%,white),to(white));width:255px;height:2px;overflow:hidden;position:absolute;left: 110px;bottom: 13px;}
+.theShower h2:before {content:" ";display:inline-block;background:#6cf;width:10px;height:30px;position:absolute;left:-14px;top:0;}
+.theTip {position:fixed;bottom:-100%;right:0;width:150px;border-radius:5px;padding:10px;-webkit-transition:all .8s ease-in-out;opacity:0;border:1px #ccc solid;background:#fff;box-shadow:rgba(0,0,0,.15) 0 2px 4px;}
+
+.error {opacity:1;bottom:0;right:0;z-index:2;background:#FFD0D0;border:1px #c30 solid;}
+.warn {opacity:1;bottom:0;left:0;z-index:1;background:#F8F491;border:1px #F3CE39 solid;}
+.ok {opacity:1;bottom:0;left:20px;z-index:3;background:#ABF39D;border:1px #7CBB2C solid;}
+</style>
+</head>
+<body>
+<div id="shower" class="theShower">
+	<h2>神秘的代码</h2>
+	<div id="siteType">
+		<input type="radio" name="type" checked="checked" id="bilibili" value="b" data-type="video" /><label for="bilibili">Bilibili</label>
+		<input type="radio" name="type" id="acfun" value="a" data-type="video" /><label for="acfun">Acfun</label>
+		<input type="radio" name="type" id="kuai" value="k" data-type="file" /><label for="kuai">快船</label>
+	</div>
+	<div>
+		<textarea id="theRes" 
+			data-videoHolder="输入想要打开的视频号，不需要加av或ac前缀。换行输入多个av或ac号可同时打开多个视频"
+			data-fileHolder="输入资源代码。换行输入多个资源代码可同时打开多个文件"
+			placeholder="输入想要打开的视频号，不需要加av或ac前缀。换行输入多个av或ac号可同时打开多个视频"
+		></textarea>
+	<div>
+	<p>
+		<input id="activeNow" type="checkbox" />
+		<label for="activeNow">激活标签(勾选将会打开最后面输入的代码)</label>
+	</p>
+	<input id="goBnt" type="button" value="走你！" /><input id="clear" type="button" value="清空" />
+</div>
+
+<script type="text/javascript">
+$(function() {
+	new GoToCode();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="../modules/util.js" ></script>
+<script src="../modules/db.js" ></script>
+<script src="../core/backconfig.js" ></script>
+<script src="../core/backcore.js" ></script>
+<script src="../libs/jquery/2.0.js" ></script>
+<script src="../modules/pages/preview.js" ></script>
+<style type="text/css">
+body {
+	margin:0;
+	padding:0;
+	font-size:12px;
+	font-family:"Microsoft YaHei";
+}
+.isLoading {
+	top:50%;
+	left:50%;
+	opacity:1;
+	z-index:9;
+	color:#fff;
+	width:200px;
+	padding:20px;
+	position:fixed;
+	text-align:center;
+	border-radius:10px;
+	border:1px solid #000;
+	margin:-28px 0 0 -120px;
+	background:rgba(0,0,0,.8);
+	transition:all .3s ease-in-out;
+	box-shadow:rgba(0,0,0,.5) 0 0 10px;
+}
+.hideLoading {
+	opacity:0;
+	top:-40px;
+}
+.mainSection {
+	margin:40px 20px;
+}
+.typeSection {
+	margin:0 0 40px;
+}
+.typeArticle {
+	margin:0 0 60px;
+}
+.typeArticle h2 {
+	color:#333;
+	font-size:24px;
+	margin:0 0 10px;
+	text-shadow:rgba(0,0,0,.2) 0 0 5px;
+}
+.subTitle {
+	position:relative;
+}
+.subTitle p {
+	height:40px;
+	font-size:14px;
+	line-height:40px;
+}
+.subTitle label ,.subTitle input {
+	vertical-align:middle;
+}
+.subTitle label {
+	margin:0 10px 0 0;
+}
+.subTitle span {
+	font-weight:bold;
+	margin:0 10px 0 20px;
+}
+.subTitle em {
+	color:#ccc;
+	font-style:normal;
+}
+.subTitle div {
+	top:0;
+	right:200px;
+	z-index:1;
+	position:absolute;
+}
+ul {
+	margin:0;
+	padding:0;
+	list-style-type:none;
+}
+li ,p{
+	padding:0;
+	margin:0;
+}
+.reList ul {
+	clear:both;
+	overflow:hidden;
+}
+.reList ul:after {
+	content:".";
+	display:block;
+	clear:both;
+	visibility:hidden;
+	height:0;
+}
+.reList {
+	padding:10px 0;
+}
+.reList li {
+	float:left;
+	width:120px;
+	height:120px;
+	cursor:pointer;
+	background:#fff;
+	margin:0 5px 10px;
+	position:relative;
+	text-align:center;
+	border:1px solid #ccc;
+	transition:all .3s ease-in-out;
+}
+.reList li.act {
+	background:#f3efbd;
+	border:1px solid #ffb800;
+}
+.reList li:hover {
+	background:#f3efbd;
+	box-shadow:rgba(0,0,0,.3) 0 0 10px;
+}
+.reList input {
+	position:absolute;
+}
+
+.reList input[type="button"]{
+	top:0;
+	right:0;
+	border:1px solid #ccc;
+	background:rgba(255,255,255,.8);
+	box-shadow:rgba(0,0,0,.2) 0 0 3px;
+}
+
+.reList input[type="checkbox"]{
+	right:0;
+	bottom:0;
+}
+
+.reList img {
+	width:100px;
+	display:inline-block;
+	vertical-align:middle;
+}
+.reList div {
+	width:100px;
+	height:100px;
+	overflow:hidden;
+	margin:10px auto 0;
+}
+.clipBox {
+	top:-30%;
+	left:50%;
+	opacity:0;
+	width:800px;
+	height:400px;
+	padding:20px;
+	position:fixed;
+	background:#fff;
+	margin-top:-220px;
+	margin-left:-420px;
+	border:1px solid #ccc;
+	transition:all .5s ease-in-out;
+	box-shadow:rgba(0,0,0,.3) 0 0 20px;
+}
+.clipBox div {
+	height:360px;
+	overflow:hidden;
+}
+.clipBox li input {
+	border:none;
+	width:690px;
+	font-size:18px;
+	margin:0 0 0 55px;
+}
+.clipBox li {
+	padding:5px 0;
+}
+.clipBox textarea {
+	width:670px;
+	height:250px;
+	padding:10px;
+	line-height:180%;
+	margin:0 0 0 55px;
+}
+.clipBox p {
+	margin:0;
+	height:40px;
+	line-height:40px;
+	text-align:right;
+	padding:0 50px 0 0;
+}
+.showPop {
+	top:50%;
+	opacity:1;
+	z-index:9;
+}
+.btn {
+	color:#FFF;
+	font-size:14px;
+	font-weight:bold;
+	padding:8px 20px;
+	background:#42B117;
+	border:1px solid #27AF32;
+	box-shadow:rgba(0,0,0,0.3) 0 0 4px;
+}
+textarea {
+	resize:none;
+	transition:all .3s ease-in-out;
+}
+textarea:focus {
+	outline:none;
+	border-color:#3f9cc6;
+	box-shadow:rgba(0,170,255,0.6) 0 0 5px;
+	&::-webkit-input-placeholder{
+		color:#dcdcdc;
+	}
+	&:input-placeholder{
+		color:#dcdcdc;
+	}
+}
+.clipBoxMask {
+	top:0;
+	left:0;
+	z-index:8;
+	width:100%;
+	opacity:.8;
+	display:none;
+	background:#fff;
+	position:absolute;
+}
+textarea::-webkit-scrollbar{
+	width:6px;
+	height:30px;
+	background-color:#e9e9e9;
+	box-shadow:rgba(0,0,0,.1) 0 0 3px inset;
+}
+textarea::-webkit-scrollbar:hover{
+	background-color:#dfdfdf;
+}
+textarea::-webkit-resizer{}
+textarea::-webkit-scrollbar-thumb{
+	border-radius:4px;
+	background-color:#ACACAC;
+}
+textarea::-webkit-scrollbar-thumb:hover{
+	background-color:#666;
+}
+textarea::-webkit-scrollbar-thumb:active{
+	background-color:#666;
+}
+</style>
+<title>预览</title>
+<body>
+	<div class="isLoading">加载中</div>
+	<section class="mainSection" id="showArea"></section>
+	<section class="clipBox" id="exportPop">
+		<div></div>
+		<p>
+			<input type="button" class="btn" value="关闭" />
+		</p>
+	</section>
+	<div class="clipBoxMask" id="exportPopMask"></div>
+</body>
+</html>

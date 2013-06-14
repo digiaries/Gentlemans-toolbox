@@ -1,0 +1,102 @@
+#lib {
+
+	// 溢出隐藏
+	.limtBox(@w:100%,@h:84px,@display:block){
+		.widthAndHeight(@w,@h);
+		overflow:hidden;
+		display:@display;
+	}
+
+	// 宽高
+	.widthAndHeight(@w:0,@h:0){
+		width:@w;
+		height:@h;
+	}
+
+	// 剧中
+	.centerAndMiddle(@margin:-25% 0 0 -25%,@top:50%,@left:50%){
+		position:absolute;
+		top:@top;
+		left:@left;
+		margin:@margin;
+	}
+
+	// css属性动画
+	.transition(@key:all,@delay:.3s,@type:ease-in-out) {
+		-webkit-transition:@arguments;
+		-moz-transition:@arguments;
+		transition:@arguments;
+	}
+
+	// 线性渐变
+	.linear(@from:#fff,@to:#bbb){
+		background-color:@to;
+		background-repeat:no-repeat;
+		background-image:-webkit-linear-gradient(@from,@to);
+		background-image:-moz-linear-gradient(top,@from,@to);
+		background-image:-ms-linear-gradient(@from,@to);
+		background-image:-o-linear-gradient(@from,@to);
+		background-image:linear-gradient(@from,@to);
+		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='@{from}', endColorstr='@{to}', GradientType=0);
+	}
+
+	.opacity(@opacity) {
+		opacity: @opacity / 100;
+		filter: ~"alpha(opacity=@{opacity})";
+	}
+
+	// 圆角
+	.radius(@ra:10px){
+		border-radius:@ra;
+	}
+
+	// 清浮动伪类
+	.clearFix(){
+		clear:both;
+		.clearFixAfter;
+	}
+	
+	.clearFixAfter(){
+		&:after {
+			content:".";
+			display:block;
+			clear:both;
+			visibility:hidden;
+			height:0;
+		}
+	}
+
+	.textEllipsis(){
+		.nowwarp;
+		display:inline-block;
+		text-overflow:ellipsis;
+	}
+
+	.nowwarp(){
+		white-space:nowrap;
+	}
+
+	// 三角
+	.triangle(@size:5px,@arr:transparent transparent rgba(0, 0, 0, 0.6) transparent) {
+		height:0;
+		width:0;
+		overflow:hidden;
+		content:" ";
+		border-width:@size;
+		border-color:@arr;
+		border-style:solid;
+	}
+
+	.setHoverActiveGradient(@start, @end) {
+		background: @start;
+		background: -moz-linear-gradient(top,  @start 0%, @end 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,@start), color-stop(100%,@end));
+		background: -webkit-linear-gradient(top,  @start 0%,@end 100%);
+		background: -o-linear-gradient(top,  @start 0%,@end 100%);
+		background: -ms-linear-gradient(top,  @start 0%,@end 100%);
+		background: linear-gradient(to bottom,  @start 0%,@end 100%);
+		filter: e(%("progid:DXImageTransform.Microsoft.Gradient(StartColorStr='%d', EndColorStr='%d', GradientType=0)",@start,@end));
+		-ms-filter: %("progid:DXImageTransform.Microsoft.gradient(startColorStr='%d', EndColorStr='%d', GradientType=0))",@start,@end);
+	}
+
+}

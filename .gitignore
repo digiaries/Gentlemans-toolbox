@@ -1,0 +1,15 @@
+.svn
+test
+~$*
+*.sublimePRJ
+*.sublime-workspace
+*.sublime-project
+/app/devcode.js
+/dev.html
+app/test.js
+grunt.js
+/libs/qunit/*
+/core/config.js
+/docs/*
+.htaccess
+node_modules

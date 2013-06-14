@@ -1,0 +1,60 @@
+<style type="text/css" id="THECEXSECTION_CLAW_CLIENT_BOX_STYLE">
+#THECEXSECTION_CLAW_CLIENT_BOX {
+	top:50%;
+	right:-400px;
+	z-index:10086;
+	position:fixed;
+	transition:all .4s ease-in-out;
+}
+#THECEXSECTION_CLAW_CLIENT_BOX .theToggleBnt {
+
+}
+#THECEXSECTION_CLAW_CLIENT_BOX .functions {
+	height:0;
+	opacity:0;
+	width:0;
+	overflow:hidden;
+	transition:all .3s ease-in-out;
+}
+#THECEXSECTION_CLAW_CLIENT_BOX .funcShow {
+	opacity:1;
+	height:200px;
+}
+#THECEXSECTION_CLAW_CLIENT_BOX .ctrlBar {
+	width:20px;
+	height:20px;
+	cursor:pointer;
+	margin:0 8px 0 0;
+	border-radius:20px;
+	border:1px solid #ccc;
+	transition:all .3s ease-in-out;
+	background:rgba(255,255,255,.5);
+	box-shadow:rgba(0,0,0,.02) 0 0 0 2px,rgba(0,0,0,.02) 0 0 0 4px,rgba(25,25,25,.02) 0 0 0 8px;
+}
+#THECEXSECTION_CLAW_CLIENT_BOX .ctrlBar:hover {
+	background:rgba(255,255,255,1);
+	box-shadow:
+		rgba(0,0,0,.03) 0 0 0 3px
+		,rgba(0,0,0,.03) 0 0 0 6px
+		,rgba(25,25,25,.03) 0 0 0 12px;
+}
+
+</style>
+<section id="THECEXSECTION_CLAW_CLIENT_BOX">
+	<div class="ctrlBar">
+	</div>
+	<section class="functions">
+		<div>
+			<p>默认类型</p>
+			<ul>
+				<li data-type="cl">草榴</li>
+				<li data-type="tb">贴吧</li>
+			</ul>
+		</div>
+		<div>
+			<p>自定义筛选</p>
+			<textarea data-type="custom"></textarea>
+			<input type="button" value="确定" />
+		</div>
+	</section>
+</section>
