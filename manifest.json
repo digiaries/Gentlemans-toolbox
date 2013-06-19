@@ -39,6 +39,7 @@
 	}*/
 	,"web_accessible_resources":[
 		"templates/claw.html"
+		,"resources/images/dajie.png"
 	]
 	,"content_scripts":[
 		{

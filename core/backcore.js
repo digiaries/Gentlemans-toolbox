@@ -205,7 +205,7 @@
 			,notice:function(conf){
 				conf = conf || {};
 				var notification = webkitNotifications.createNotification(
-					"/resources/images/48.png"
+					"/resources/images/dajie.png"
 					,conf.title || "提示"
 					,conf.msg || "开玩笑吧。。。"
 				);
