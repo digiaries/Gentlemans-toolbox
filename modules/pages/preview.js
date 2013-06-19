@@ -153,8 +153,8 @@
 				pop.title.val(data.title);
 
 				// 开启浏览器下载功能
-				// @todo 是否不要用这个。这个每个文件都会有确认窗口。好烦
-				for(var i = 0,len = data.urls.length;i<len;i++){
+				// @todo 大量下载会导致浏览器崩溃。只能npapi或自己复制列表用工具下载
+				/*for(var i = 0,len = data.urls.length;i<len;i++){
 					 chrome.downloads.download(
 						{
 							"url":data.urls[i]
@@ -162,7 +162,7 @@
 						,function(id) {
 						}
 					);
-				}
+				}*/
 
 				// 文件地址列表
 				pop.urls.val(data.urls.join("\n"));
