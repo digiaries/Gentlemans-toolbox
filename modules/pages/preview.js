@@ -28,23 +28,56 @@
 					,"popArea":null
 					,"popMask":null
 				}
+
 				this.$status = {
+					// 弹出层状态
 					"pop":false
 				}
+
+				// ctrl状态
+				this.$ctrlPress = false;
+
 				setTimeout(function(){
+					// 1s的准备时间
 					this.getRecord();
 				}.bind(this),1000);
 			}
+			/**
+			 * 事件绑定函数
+			 * @return {Undefined} 无返回值
+			 */
 			,bindEvent:function(){
-				this.doms.contain.find(".typeArticle li").bind("click",function(ev){
-					var tag = $(ev.target).closest("li");
-					tag.toggleClass("act")
-						.find(":checkbox")
-						.prop("checked",function(i,val){
-							return !val;
-						});
+
+				// 图片点击事件
+				this.doms.contain.find(".typeArticle li")
+					.bind("click",function(ev){
+						var tag = $(ev.target).closest("li");
+						if(this.$ctrlPress){
+							// 按住ctrl并点击图片
+							window.open(tag.find("img").attr("src"));
+						}else{
+							// 单纯的点击
+							tag.toggleClass("act")
+								.find(":checkbox")
+								.prop("checked",function(i,val){
+									return !val;
+								});
+						}
+					}.bind(this));
+
+				// 按键监听
+				// 当前只处理ctrl
+				$(document).bind("keydown keyup",function(ev){
+					if(ev.keyCode === 17 && ev.type === "keydown"){
+						// 按住
+						this.$ctrlPress = true;
+					}else{
+						// 松开
+						this.$ctrlPress = false;
+					}
 				}.bind(this));
 
+				// 导出按钮
 				this.doms.contain.find(".exportUrls").bind("click",function(ev){
 					var tag = $(ev.target)
 						,type = tag.attr("data-type")
@@ -57,6 +90,8 @@
 						}
 						,data = this.$data[type][key]
 						,i;
+
+					// 循环选择的项目
 					select.each(function(){
 						i = this.value;
 						if(data[i]){
@@ -69,30 +104,43 @@
 							re.urls.push(data[i].url);
 						}
 					});
+
 					if(re.urls.length){
+						// 有选中
 						this.showExports(re);
 					}
 					tag = type = key = select = re = data = i = null;
 				}.bind(this));
 
+				// 全选
 				this.doms.contain.find(".selectAll").bind("change",function(ev){
 					var tag = $(ev.target)
 						,status = tag.prop("checked")
 						,key = tag.attr("data-key");
+
+					// 处理checkbox
 					this.doms.articles[key]
 						.find(":checkbox").prop("checked",status);
+
+					// 处理选中样式
 					this.doms.articles[key].find("li")[
 						status && "addClass" || "removeClass"
 					]("act");
 				}.bind(this));
 
+				// 弹出层关闭按钮
 				this.doms.popClose.bind("click",this.hideExports.bind(this));
-
 			}
+			/**
+			 * 显示导出弹出层
+			 * @param  {Object}    data 要显示的数据
+			 * @return {Undefined}      无返回值
+			 */
 			,showExports:function(data){
 				var pop = this.doms.popArea
 					,tmp;
 				if(!this.$status.pop){
+					// 弹出层还未创建
 					pop.append(
 						_buildReList()
 					);
@@ -103,12 +151,31 @@
 				}
 				pop.popType.val(data.type);
 				pop.title.val(data.title);
+
+				// 开启浏览器下载功能
+				// @todo 是否不要用这个。这个每个文件都会有确认窗口。好烦
+				for(var i = 0,len = data.urls.length;i<len;i++){
+					 chrome.downloads.download(
+						{
+							"url":data.urls[i]
+						}
+						,function(id) {
+						}
+					);
+				}
+
+				// 文件地址列表
 				pop.urls.val(data.urls.join("\n"));
+
 				this.doms.popMask
 					.height($(document).height())
 					.show();
 				this.doms.pop.addClass("showPop");
 			}
+			/**
+			 * 隐藏导出弹出层
+			 * @return {Undefined} 无返回值
+			 */
 			,hideExports:function(){
 				var pop = this.doms.popArea;
 				this.doms.popMask.hide();
@@ -118,8 +185,14 @@
 				pop.urls.val("");
 				pop = null;
 			}
+			/**
+			 * 设定要显示的数据
+			 * @param  {Object}    data 数据
+			 * @return {Undefined}      无返回值
+			 */
 			,setData:function(data){
 				var dat = {}
+				// 生成模块可用的数据
 				data.forEach(function(item){
 					dat[item.type] = dat[item.type] || {};
 					dat[item.type][item.key] = dat[item.type][item.key] || [];
@@ -127,9 +200,16 @@
 				});
 				this.$data = dat;
 				this.build(this.$data);
+				dat = null;
 			}
+			/**
+			 * 构建界面
+			 * @param  {Object}    data 数据对象
+			 * @return {Undefined}      无返回值
+			 */
 			,build:function(data){
 				if(!this.doms.contain){
+					// 缓存必要的DOM对象
 					this.doms.contain = $("#showArea");
 					this.doms.loading = $(".isLoading");
 					this.doms.pop = $("#exportPop");
@@ -140,16 +220,24 @@
 				var section;
 				this.doms.loading.addClass("hideLoading");
 				for(var n in data){
+					// 生成每个站点
 					section = $('<section class="typeSection"></section>');
 					for(var m in data[n]){
+						// 生成每一篇
 						this.doms.articles[m] = $(_buildBlock(data[n][m]));
 						section.append(this.doms.articles[m]);
 					}
 					this.doms.sections[n] = section;
 					this.doms.contain.append(section);
 				}
+				// 事件绑定
 				this.bindEvent();
 			}
+			/**
+			 * 从数据库中获取记录
+			 * @param  {Function}    cb 回调函数
+			 * @return {Undefined}      无返回值
+			 */
 			,getRecord:function(cb){
 				cb = cb || this.setData;
 				APP.getRecordedImg(cb.bind(this));
@@ -157,6 +245,12 @@
 		}
 	);
 
+	/**
+	 * 生成站点文章
+	 * @param  {Array}   data 文章数组
+	 * @return {String}       html字符串
+	 * @private
+	 */
 	function _buildBlock(data){
 		var dat = data[0];
 		var htm = ['<article class="typeArticle"><h2>'+dat.title+'</h2><div class="subTitle">'];
@@ -172,6 +266,11 @@
 		return htm;
 	}
 
+	/**
+	 * 构造文章内容列表(图片)
+	 * @return {String} 列表字符串
+	 * @private
+	 */
 	function _buildReList(){
 		var htm = ['<ul>'];
 		htm.push('<li><input data-type="type" type="text" readonly="true" /></li>');
