@@ -251,10 +251,39 @@ textarea::-webkit-scrollbar-thumb:hover{
 textarea::-webkit-scrollbar-thumb:active{
 	background-color:#666;
 }
+.tip {
+	opacity:0;
+	font-size:14px;
+	margin-left:20px;
+	margin-right:20px;
+	margin-top:-120px;
+	background:#49992B;
+	transition:all .3s ease-in-out;
+	box-shadow:rgba(0,0,0,.15) 0 2px 4px;
+}
+.tip ol {
+	margin:0;
+	padding:20px 40px 12px;
+}
+.tip li {
+	color:#fff;
+	margin:0 0 8px;
+}
+.tipShow {
+	opacity:1;
+	margin-top:0;
+}
 </style>
 <title>预览</title>
 <body>
 	<div class="isLoading">加载中</div>
+	<section class="tip" id="previewTip">
+		<ol>
+			<li>导出功能现在只支持导出列表。暂时还不能自动下载。请自行复制弹出层中的地址列表于下载工具中批量下载。</li>
+			<li>按住ctrl键单击图片可在新窗口中浏览图片。</li>
+			<li>还没想到……</li>
+		</ol>
+	</section>
 	<section class="mainSection" id="showArea"></section>
 	<section class="clipBox" id="exportPop">
 		<div></div>

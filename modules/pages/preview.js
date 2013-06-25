@@ -32,6 +32,7 @@
 				this.$status = {
 					// 弹出层状态
 					"pop":false
+					,"tip":false
 				}
 
 				// ctrl状态
@@ -130,6 +131,9 @@
 
 				// 弹出层关闭按钮
 				this.doms.popClose.bind("click",this.hideExports.bind(this));
+
+				// 隐藏提示
+				this.doms.tip.bind("click",this.hideTip.bind(this));
 			}
 			/**
 			 * 显示导出弹出层
@@ -171,6 +175,14 @@
 					.height($(document).height())
 					.show();
 				this.doms.pop.addClass("showPop");
+			}
+			/**
+			 * 隐藏提示弹出层
+			 * @return {Undefined} 无返回值
+			 */
+			,hideTip:function(){
+				this.doms.tip.removeClass("tipShow");
+				this.$status.tip = false;
 			}
 			/**
 			 * 隐藏导出弹出层
@@ -216,6 +228,7 @@
 					this.doms.popMask = $("#exportPopMask");
 					this.doms.popArea = this.doms.pop.find("div:first");
 					this.doms.popClose = this.doms.pop.find("input");
+					this.doms.tip = $("#previewTip");
 				}
 				var section;
 				this.doms.loading.addClass("hideLoading");
@@ -232,6 +245,16 @@
 				}
 				// 事件绑定
 				this.bindEvent();
+
+				// 显示提示
+				this.doms.tip.addClass("tipShow");
+				this.$status.tip = true;
+				// 3s后隐藏
+				setTimeout(function(){
+					if(this.$status.tip){
+						this.hideTip();
+					}
+				}.bind(this),3000);
 			}
 			/**
 			 * 从数据库中获取记录
