@@ -156,6 +156,31 @@
 				}
 			}
 			/**
+			 * 按索引删除记录的图片
+			 * @param  {String}      index    图片索引类型
+			 * @param  {String}      key      匹配的键值
+			 * @param  {Function}    callback 回调函数
+			 * @return {Undefined}            无返回值
+			 */
+			,delRecordedImgByIndex:function(index,key,callback){
+				var objectStore = this.DB.db.transaction(["imgrecord"],"readwrite").objectStore("imgrecord");
+				var sdIndex = objectStore.index(index);
+				var result = 0;
+				sdIndex.openKeyCursor(key).onsuccess = function(evt){
+					var cursor = evt.target.result;
+					if(cursor){
+						objectStore.delete(cursor.primaryKey).onsuccess = function(event){
+							result += 1;
+						}
+						cursor.continue();
+					}else{
+						if(callback){
+							callback(result);
+						}
+					}
+				}
+			}
+			/**
 			 * 序列化参数
 			 * @param  {Object} data 参数对象
 			 * @return {String}      参数字符串
