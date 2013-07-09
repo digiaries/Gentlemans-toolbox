@@ -132,8 +132,36 @@
 				// 弹出层关闭按钮
 				this.doms.popClose.bind("click",this.hideExports.bind(this));
 
+				// 弹出层保存按钮
+				this.doms.popSave.bind("click",this.save.bind(this));
+
 				// 隐藏提示
 				this.doms.tip.bind("click",this.hideTip.bind(this));
+			}
+			/**
+			 * 保存到服务器
+			 * @return {Undefined} 无返回值
+			 */
+			,save:function(){
+				var area = this.doms.popArea;
+				$.post(
+					"http://api.chaoticsea.tk:81"
+					,{
+						"type":"saveImgFiles"
+						,"sources":area.popType.val()
+						,"title":area.title.val()
+						,"items":area.urls.val().split("\n").toString()
+					}
+					,function(re){
+						APP.notice({
+							"title":"可喜可贺"
+							,"msg":re.msg
+						});
+						// @todo 标识已下载的文件。下次预览就不显示了
+						// @todo 改数据库结构
+					}
+				);
+				area = null;
 			}
 			/**
 			 * 显示导出弹出层
@@ -227,7 +255,8 @@
 					this.doms.pop = $("#exportPop");
 					this.doms.popMask = $("#exportPopMask");
 					this.doms.popArea = this.doms.pop.find("div:first");
-					this.doms.popClose = this.doms.pop.find("input");
+					this.doms.popClose = this.doms.pop.find("input[data-type='close']");
+					this.doms.popSave = this.doms.pop.find("input[data-type='save']");
 					this.doms.tip = $("#previewTip");
 				}
 				var section;
