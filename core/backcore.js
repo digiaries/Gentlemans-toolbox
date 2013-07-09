@@ -1,6 +1,6 @@
 (function(){
 	function noop(){};
-	// https://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=SZGjGz1puKE4xT5ZHLpmxEiK&redirect_uri=chrome-extension://mpkhgiolfhfmonnpmmgoelolgohgeeaa/pages/background.html&display=popup&scope=netdisk
+
 	// 类式继承功能函数
 	function argv_run(ag, proto, scope, func, args){
 		if (!func || !(func in proto)) {return undefined;}
@@ -102,24 +102,6 @@
 				tmp = null;
 			}
 			/**
-			 * 通过服务器代理获取图片
-			 * @param  {Object}    req 客户端请求信息对象
-			 * @return {Undefined}     无返回值
-			 * @deprecated             不到万不得已，不启用这个方法
-			 */
-			,getImg:function(req){
-				this.ajax({
-					"url":"http://plugin.dev/proxy/port.php"
-					,"data":{
-						"url":_getImgUrl.call(this,req.data.url)
-						,"title":req.data.title
-					}
-					,success:function(re){
-						_saveImgRecordToDB.call(this,re.result.items,re.result.title,re.result.type);
-					}
-				});
-			}
-			/**
 			 * 保存图片到数据库
 			 * @param  {Object}    data 数据对象
 			 * @return {Undefined}      无返回值
@@ -141,8 +123,9 @@
 				// if(!this.DB.db){
 				// 	return false;
 				// }
-				var objectStore = this.DB.db.transaction(["imgrecord"]).objectStore("imgrecord");
-				var result = [];
+				var dbName = this.funcsConfig.imgs.exDb
+					,objectStore = this.DB.db.transaction([dbName]).objectStore(dbName)
+					,result = [];
 				objectStore.openCursor().onsuccess = function(ev){
 					var cursor = ev.target.result;
 					if(cursor){
@@ -163,9 +146,10 @@
 			 * @return {Undefined}            无返回值
 			 */
 			,delRecordedImgByIndex:function(index,key,callback){
-				var objectStore = this.DB.db.transaction(["imgrecord"],"readwrite").objectStore("imgrecord");
-				var sdIndex = objectStore.index(index);
-				var result = 0;
+				var dbName = this.funcsConfig.imgs.exDb
+					,objectStore = this.DB.db.transaction([dbName],"readwrite").objectStore(dbName)
+					,sdIndex = objectStore.index(index)
+					,result = 0
 				sdIndex.openKeyCursor(key).onsuccess = function(evt){
 					var cursor = evt.target.result;
 					if(cursor){
@@ -236,6 +220,9 @@
 				);
 				notification.show();
 			}
+			,test:function(){
+
+			}
 		}
 	);
 
@@ -245,7 +232,7 @@
 	 * @return {Undefined}    无返回值
 	 */
 	function _chkDB(ev){
-		if(!this.DB.chkStore("imgrecord")){
+		if(!this.DB.chkStore(this.funcsConfig.imgs.exDb)){
 			_initDB.call(this);
 		}
 		// @todo 已存在的话需要检测表
@@ -269,25 +256,6 @@
 	var REGEXP = {
 		"host":/^((\w+):\/\/)?([^\/\?:]+)?(\/?[^\?#]+)/
 	}
-	/**
-	 * 获取页面特定位置的url
-	 * @param  {String} url 目标URL
-	 * @return {String}     处理完的URL
-	 * @deprecated          服务器获取的配套函数。已弃用
-	 */
-	function _getImgUrl(url){
-		url = "http://184.154.128.246/htm_data/16/1305/904009.html";
-		var hosts = util.has(this.funcsConfig,"getImg.hostMap")
-			,real = REGEXP.host.exec(url)
-			,type;
-		if(real && real.length>1){
-			real = real.slice(1);
-			type = hosts[real[2]];
-			url = "/"+type+real[3];
-		}
-		hosts = real = type = null;
-		return url;
-	}
 
 	/**
 	 * 保存至数据库
@@ -297,13 +265,10 @@
 	 * @return {Undefined}       无返回值
 	 */
 	function _saveImgRecordToDB(rec,title,type){
+		var dbName = this.funcsConfig.imgs.exDb;
 		var stores = {
-				"open":["imgrecord"]
-				,"stores":{
-					"imgrecord":{
-						"data":null
-					}
-				}
+				"open":[dbName]
+				,"stores":{}
 				,complete:function(re){
 					this.notice({
 						"title":"记录成功"
@@ -314,6 +279,9 @@
 			,data = []
 			,key
 			,time = util.date("Y-m-d",new Date());
+
+		stores.stores[dbName] = {"data":null};
+
 		// 用标题加时间生成一个Key用以代替标题做索引
 		// @todo 或者用其他的？
 		key = util.encode64(
