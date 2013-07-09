@@ -42,6 +42,16 @@
 	}
 
 	/**
+	 * 图片抓取支援网站名称
+	 * @type {Object}
+	 * @private
+	 */
+	var IMGS_HOSTS_NAME_MAP = {
+		"jk":"捷克"
+		,"cl":"草榴"
+	}
+
+	/**
 	 * 图片抓取结果
 	 * @type {Array}
 	 * @private
@@ -86,6 +96,7 @@
 	 */
 	var BACK_LIST = {
 		"www.400gb.com":/(.*)www\.400gb\.com\/(.*)/
+		,"www.yimuhe.com":/(.*)www\.yimuhe\.com\/(.*)/
 	}
 
 	function Claw(){
