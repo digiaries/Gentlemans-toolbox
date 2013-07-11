@@ -27,6 +27,9 @@
 					,"pop":null
 					,"popArea":null
 					,"popMask":null
+					,"expAllBox":null
+					,"expAll":null
+					,"noData":null
 				}
 
 				this.$status = {
@@ -34,6 +37,8 @@
 					"pop":false
 					,"tip":false
 				}
+
+				this.$len = 0;
 
 				// ctrl状态
 				this.$ctrlPress = false;
@@ -88,6 +93,7 @@
 							"title":null
 							,"type":null
 							,"urls":[]
+							,"key":key
 						}
 						,data = this.$data[type][key]
 						,i;
@@ -150,6 +156,7 @@
 						"type":"saveImgFiles"
 						,"sources":area.popType.val()
 						,"title":area.title.val()
+						,"key":area.key.val()
 						,"items":area.urls.val().split("\n").toString()
 					}
 					,function(re){
@@ -157,11 +164,47 @@
 							"title":"可喜可贺"
 							,"msg":re.msg
 						});
+						if(re.ok){
+							re = re.result.items;
+							this.removeItems(re);
+							this.hideExports();
+							if(util.isEmpty(this.doms.articles)){
+								this.doms.contain.hide();
+								this.doms.expAllBox.hide();
+								this.doms.noData.show();
+							}
+							data = article = chked = beRemove = null;
+						}
+
+						// doms.articles
 						// @todo 标识已下载的文件。下次预览就不显示了
-						// @todo 改数据库结构
-					}
+					}.bind(this)
 				);
 				area = null;
+			}
+			,removeItems:function(re){
+				var data = this.$data[re.sources][re.key]
+					,article = this.doms.articles[re.key]
+					,chked = article.find("li :checked")
+					,beRemove = [];
+
+				if(chked.length === data.length){
+					article.remove();
+					beRemove = data;
+					delete this.doms.articles[re.key];
+					delete this.$data[re.sources][re.key];
+				}else{
+					chked.each(function(){
+						var tag = $(this).closest("li")
+							,index = tag.find(":button").val()-1
+							,url = tag.find("img:first").attr("src");
+						if(data[index].url === url){
+							beRemove.push(data[index]);
+							tag.remove();
+						}
+					});
+				}
+				APP.moveToPostDbByKey(beRemove,re.key);
 			}
 			/**
 			 * 显示导出弹出层
@@ -179,11 +222,13 @@
 					tmp = pop.find('input');
 					pop.popType = tmp.eq(0);
 					pop.title = tmp.eq(1);
+					pop.key = tmp.eq(2);
 					pop.urls = pop.find("textarea");
+					this.$status.pop = true;
 				}
 				pop.popType.val(data.type);
 				pop.title.val(data.title);
-
+				pop.key.val(data.key);
 				// 开启浏览器下载功能
 				// @todo 大量下载会导致浏览器崩溃。只能npapi或自己复制列表用工具下载
 				/*for(var i = 0,len = data.urls.length;i<len;i++){
@@ -238,6 +283,7 @@
 					dat[item.type][item.key] = dat[item.type][item.key] || [];
 					dat[item.type][item.key].push(item);
 				});
+				this.$len = data.length;
 				this.$data = dat;
 				this.build(this.$data);
 				dat = null;
@@ -248,42 +294,54 @@
 			 * @return {Undefined}      无返回值
 			 */
 			,build:function(data){
-				if(!this.doms.contain){
+				var doms = this.doms;
+				if(!doms.contain){
 					// 缓存必要的DOM对象
-					this.doms.contain = $("#showArea");
-					this.doms.loading = $(".isLoading");
-					this.doms.pop = $("#exportPop");
-					this.doms.popMask = $("#exportPopMask");
-					this.doms.popArea = this.doms.pop.find("div:first");
-					this.doms.popClose = this.doms.pop.find("input[data-type='close']");
-					this.doms.popSave = this.doms.pop.find("input[data-type='save']");
-					this.doms.tip = $("#previewTip");
+					doms.contain = $("#showArea");
+					doms.loading = $(".isLoading");
+					doms.pop = $("#exportPop");
+					doms.popMask = $("#exportPopMask");
+					doms.popArea = doms.pop.find("div:first");
+					doms.popClose = doms.pop.find("input[data-type='close']");
+					doms.popSave = doms.pop.find("input[data-type='save']");
+					doms.tip = $("#previewTip");
+					doms.expAllBox = $("#expAllBox");
+					doms.expAll = doms.expAllBox.find("input");
+					doms.noData = $("#noDataBox");
 				}
-				var section;
-				this.doms.loading.addClass("hideLoading");
-				for(var n in data){
-					// 生成每个站点
-					section = $('<section class="typeSection"></section>');
-					for(var m in data[n]){
-						// 生成每一篇
-						this.doms.articles[m] = $(_buildBlock(data[n][m]));
-						section.append(this.doms.articles[m]);
+
+				doms.loading.addClass("hideLoading");
+
+				if(this.$len){
+					var section;
+					for(var n in data){
+						// 生成每个站点
+						section = $('<section class="typeSection"></section>');
+						for(var m in data[n]){
+							// 生成每一篇
+							doms.articles[m] = $(_buildBlock(data[n][m]));
+							section.append(doms.articles[m]);
+						}
+						doms.sections[n] = section;
+						doms.contain.append(section);
 					}
-					this.doms.sections[n] = section;
-					this.doms.contain.append(section);
+
+					// 显示提示
+					doms.tip.addClass("tipShow");
+					this.$status.tip = true;
+					// 3s后隐藏
+					setTimeout(function(){
+						if(this.$status.tip){
+							this.hideTip();
+						}
+					}.bind(this),3000);
+					doms.expAllBox.show();
+				}else{
+					doms.noData.show();
 				}
+
 				// 事件绑定
 				this.bindEvent();
-
-				// 显示提示
-				this.doms.tip.addClass("tipShow");
-				this.$status.tip = true;
-				// 3s后隐藏
-				setTimeout(function(){
-					if(this.$status.tip){
-						this.hideTip();
-					}
-				}.bind(this),3000);
 			}
 			/**
 			 * 从数据库中获取记录
@@ -306,7 +364,7 @@
 	function _buildBlock(data){
 		var dat = data[0];
 		var htm = ['<article class="typeArticle"><h2>'+dat.title+'</h2><div class="subTitle">'];
-		htm.push('<p><span>'+dat.type.toUpperCase()+'</span><em>'+dat.time+'</em></p>');
+		htm.push('<p><span>'+dat.typeName+'</span><em>'+dat.time+'</em></p>');
 		htm.push('<div><input data-type="'+dat.type+'" data-key="'+dat.key+'" class="selectAll" type="checkbox" id="selectAll_'+dat.timestamp+'" /><label for="selectAll_'+dat.timestamp+'">全选</label><input type="button" class="btn exportUrls" data-type="'+dat.type+'" data-key="'+dat.key+'" class="btn" value="导出" /></div>');
 		htm.push('</div><div class="reList"><ul>');
 		data.forEach(function(item,index){
@@ -326,7 +384,7 @@
 	function _buildReList(){
 		var htm = ['<ul>'];
 		htm.push('<li><input data-type="type" type="text" readonly="true" /></li>');
-		htm.push('<li><input data-type="title" type="text" readonly="true" /></li>');
+		htm.push('<li><input data-type="title" type="text" readonly="true" /><input data-type="key" type="hidden" readonly="true" /></li>');
 		htm.push('<li><textarea data-type="urls"></textarea></li>');
 		htm.push('</ul>');
 		return htm.join("");
