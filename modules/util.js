@@ -350,6 +350,15 @@
 	exports.strUnicode2Ansi = strUnicode2Ansi;
 	exports.strAnsi2Unicode = strAnsi2Unicode;
 
+	exports.isEmpty = function(obj){
+		var n = 0;
+		for(var n in obj){
+			n = 1;
+			break;
+		}
+		return !n;
+	}
+
 	if(!window.define){
 		return exports;
 	}
