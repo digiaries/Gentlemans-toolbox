@@ -112,6 +112,7 @@
 					,data.items
 					,data.title
 					,data.type
+					,data.typeName
 				);
 			}
 			/**
@@ -164,6 +165,35 @@
 					}
 				}
 			}
+			,moveToPostDbByKey:function(data,key,callback){
+				var dbName = this.funcsConfig.imgs.exDb
+					,objectStore = this.DB.db.transaction([dbName],"readwrite").objectStore(dbName)
+					,sdIndex = objectStore.index("key")
+					,urls = [];
+				data.forEach(function(item){
+					urls.push(item.url);
+				});
+				sdIndex.openKeyCursor(key).onsuccess = function(evt){
+					var cursor = evt.target.result;
+					if(cursor && urls.indexOf(cursor.primaryKey) !== -1){
+						objectStore.delete(cursor.primaryKey);
+						cursor.continue();
+					}
+				}
+
+				dbName = this.funcsConfig.imgs.posted;
+				var stores = {
+					"open":[dbName]
+					,"stores":{}
+					,complete:function(re){
+						if(callback){
+							callback();
+						}
+					}.bind(this)
+				}
+				stores.stores[dbName] = {"data":data};
+				this.DB.add(stores);
+			}
 			/**
 			 * 序列化参数
 			 * @param  {Object} data 参数对象
@@ -208,17 +238,24 @@
 			}
 			/**
 			 * 浏览器桌面提示
-			 * @param  {Object}    conf 提示信息配置对象
-			 * @return {Undefined}      无返回值
+			 * @param  {Object}    conf  提示信息配置对象
+			 * @param  {Number}    delay 自动隐藏时间。0~100则不自动隐藏，默认2000ms
+			 * @return {Undefined}       无返回值
 			 */
-			,notice:function(conf){
+			,notice:function(conf,delay){
 				conf = conf || {};
+				delay = delay === undefined ?2000:delay;
 				var notification = webkitNotifications.createNotification(
 					"/resources/images/dajie.png"
 					,conf.title || "提示"
 					,conf.msg || "开玩笑吧。。。"
 				);
 				notification.show();
+				if(delay){
+					setTimeout(function(){
+						notification.cancel();
+					},delay);
+				}
 			}
 			,test:function(){
 
@@ -259,12 +296,13 @@
 
 	/**
 	 * 保存至数据库
-	 * @param  {Array}     rec   要保存的数据数组
-	 * @param  {String}    title 页面标题
-	 * @param  {String}    type  所属网站
-	 * @return {Undefined}       无返回值
+	 * @param  {Array}     rec       要保存的数据数组
+	 * @param  {String}    title     页面标题
+	 * @param  {String}    type      所属网站
+	 * @param  {String}    typeName  所属网站名称
+	 * @return {Undefined}           无返回值
 	 */
-	function _saveImgRecordToDB(rec,title,type){
+	function _saveImgRecordToDB(rec,title,type,typeName){
 		var dbName = this.funcsConfig.imgs.exDb;
 		var stores = {
 				"open":[dbName]
@@ -272,7 +310,7 @@
 				,complete:function(re){
 					this.notice({
 						"title":"记录成功"
-						,"msg":"本次共记录"+re.imgrecord.count+"张图片"
+						,"msg":"本次共记录"+re[this.funcsConfig.imgs.exDb].count+"张图片"
 					});
 				}.bind(this)
 			}
@@ -295,10 +333,11 @@
 				,"url":rec[i]
 				,"type":type
 				,"key":key
+				,"typeName":typeName
 			});
 		}
 
-		stores.stores.imgrecord.data = data;
+		stores.stores[dbName].data = data;
 		this.DB.add(stores);
 
 		stores = time = data = time = rec = key = null;
