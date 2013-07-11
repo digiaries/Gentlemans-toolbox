@@ -74,7 +74,7 @@
 		}
 		,jk:function(){
 			IMGS_RE = [];
-			$("table[summary]:first td[id*='postmessage'] img").each(function(){
+			$("table[summary]:first td[id*='postmessage'] img,table[summary]:first ignore_js_op img").each(function(){
 				IMGS_RE.push(
 					$(this).attr("src")
 				);
@@ -97,6 +97,7 @@
 	var BACK_LIST = {
 		"www.400gb.com":/(.*)www\.400gb\.com\/(.*)/
 		,"www.yimuhe.com":/(.*)www\.yimuhe\.com\/(.*)/
+		,"www.nyhx.com":/(.*)www\.nyhx.com\.com\/(.*)/
 	}
 
 	function Claw(){
@@ -113,6 +114,10 @@
 		// 密集阵开启中LOL
 		this.onFire = false;
 		this.fireTimer = null;
+
+		// 子菜单状态
+		this.menuStatus = 0;
+		this.menuTimer = null;
 
 		this.init();
 	}
@@ -158,6 +163,13 @@
 			_phalanx.call(this);
 		}
 	}
+	/**
+	 * 切换密集阵
+	 * @return {Undefined} 无返回值
+	 */
+	CP.togglePhalanx = function(){
+		_phalanx.call(this);
+	}
 
 	/**
 	 * 检测输入的命令
@@ -202,6 +214,28 @@
 		return this;
 	}
 
+	function _bindMenu(){
+		this.box.mBnts = this.box.menu.children("div");
+		this.box.mBnts.bind("click",_menuHandler.bind(this));
+	}
+
+	function _menuHandler(ev){
+		var type = $(ev.target).closest("div[data-type]").attr("data-type");
+		switch(type){
+			case "saveImg":
+				this.getImg();
+			break;
+
+			case "custom":
+				LOG("╮(╯▽╰)╭","result");
+			break;
+
+			case "togglePhalanx":
+				this.togglePhalanx();
+			break;
+		}
+	}
+
 	/**
 	 * 显示控制栏
 	 * @return {Object} CP实例
@@ -232,8 +266,9 @@
 	 */
 	CP.getImg = function(){
 		var re = []
+			,type = IMGS_HOSTS_MAP[window.location.host]
 			,fn = IMGS_SELECTORS[
-				IMGS_HOSTS_MAP[window.location.host]
+				type
 			];
 		if(util.isFunc(fn)){
 			// 有匹配的
@@ -248,7 +283,8 @@
 				,{
 					"items":[].concat(IMGS_RE)
 					,"title":document.title
-					,"type":IMGS_HOSTS_MAP[window.location.host]
+					,"typeName":IMGS_HOSTS_NAME_MAP[type]
+					,"type":type
 				}
 			);
 			// 清空结果
@@ -341,7 +377,10 @@
 			$("body:first").append(this.injection);
 			this.styleEl = $("#"+BOXID+"_STYLE");
 			this.box = $("#"+BOXID);
+			this.box.menu = this.box.find(".functions");
 			$("head").append(this.styleEl);
+			this.show();
+			_bindMenu.call(this);
 		}.bind(this));
 
 		// 绑定事件
