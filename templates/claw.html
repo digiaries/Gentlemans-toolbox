@@ -10,51 +10,108 @@
 
 }
 #THECEXSECTION_CLAW_CLIENT_BOX .functions {
+	width:0;
+	top:22px;
 	height:0;
 	opacity:0;
-	width:0;
-	overflow:hidden;
-	transition:all .3s ease-in-out;
+	right:30px;
+	position:absolute;
+	transition:all .4s ease-in-out;
 }
-#THECEXSECTION_CLAW_CLIENT_BOX .funcShow {
+
+#THECEXSECTION_CLAW_CLIENT_BOX .functions > div {
+	right:5px;
+	top:-22px;
+	opacity:0;
+	min-width:6em;
+	font-size:12px;
+	cursor:pointer;
+	text-align:right;
+	padding:2px 10px;
+	position:absolute;
+	border-radius:5px;
+	transition: all .3s ease-in-out;
+	background:rgba(255,255,255,.2);
+	-webkit-transform:rotate(-90deg);
+	-webkit-transform-origin: 125% 60%;
+	box-shadow:rgba(0,0,0,.5) 0 0 1px 0;
+}
+
+#THECEXSECTION_CLAW_CLIENT_BOX .functions p {
+	white-space:nowrap;
+	letter-spacing:.25em;
+}
+
+#THECEXSECTION_CLAW_CLIENT_BOX .functions .subFunc {
+	display:none;
+}
+
+#THECEXSECTION_CLAW_CLIENT_BOX:hover {
+	width:108px;
+	height:120px;
+}
+
+#THECEXSECTION_CLAW_CLIENT_BOX:hover .functions {
 	opacity:1;
-	height:200px;
 }
+
+#THECEXSECTION_CLAW_CLIENT_BOX:hover .functions > div {
+	opacity:1;
+	color:#FFF;
+	background:rgba(0,0,0,0.5);
+}
+
+#THECEXSECTION_CLAW_CLIENT_BOX:hover .functions > div[data-deg="45"] {
+	-webkit-transform:rotate(45deg);
+}
+
+#THECEXSECTION_CLAW_CLIENT_BOX:hover .functions > div[data-deg="0"] {
+	-webkit-transform:rotate(0deg);
+}
+
+#THECEXSECTION_CLAW_CLIENT_BOX:hover .functions > div[data-deg="-45"] {
+	-webkit-transform:rotate(-45deg);
+}
+
 #THECEXSECTION_CLAW_CLIENT_BOX .ctrlBar {
+	top:0;
+	right:0;
 	width:20px;
 	height:20px;
 	cursor:pointer;
 	margin:0 8px 0 0;
+	position: absolute;
 	border-radius:20px;
-	border:1px solid #ccc;
 	transition:all .3s ease-in-out;
 	background:rgba(255,255,255,.5);
 	box-shadow:rgba(0,0,0,.02) 0 0 0 2px,rgba(0,0,0,.02) 0 0 0 4px,rgba(25,25,25,.02) 0 0 0 8px;
 }
-#THECEXSECTION_CLAW_CLIENT_BOX .ctrlBar:hover {
-	background:rgba(255,255,255,1);
+#THECEXSECTION_CLAW_CLIENT_BOX:hover .ctrlBar {
+	background:rgba(0,0,0,.6);
 	box-shadow:
-		rgba(0,0,0,.03) 0 0 0 3px
-		,rgba(0,0,0,.03) 0 0 0 6px
-		,rgba(25,25,25,.03) 0 0 0 12px;
+		rgba(255, 255, 255, 0.5) 0 0 0 3px
+		,rgba(255, 255, 255, 0.4) 0 0 0 6px
+		,rgba(255, 255, 255, 0.3) 0 0 0 12px;
 }
+
 
 </style>
 <section id="THECEXSECTION_CLAW_CLIENT_BOX">
 	<div class="ctrlBar">
 	</div>
 	<section class="functions">
-		<div>
-			<p>默认类型</p>
-			<ul>
-				<li data-type="cl">草榴</li>
-				<li data-type="tb">贴吧</li>
-			</ul>
+		<div data-deg="0" data-type="saveImg">
+			<p>保存图片</p>
 		</div>
-		<div>
-			<p>自定义筛选</p>
-			<textarea data-type="custom"></textarea>
-			<input type="button" value="确定" />
+		<div data-deg="45" data-type="togglePhalanx">
+			<p>防空炮</p>
+		</div>
+		<div data-deg="-45" data-type="custom">
+			<p>自定义</p>
+			<div class="subFunc">
+				<textarea></textarea>
+				<input type="button" value="确定" />
+			</div>
 		</div>
 	</section>
 </section>
