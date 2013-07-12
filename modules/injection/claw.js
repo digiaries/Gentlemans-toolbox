@@ -119,6 +119,9 @@
 		this.menuStatus = 0;
 		this.menuTimer = null;
 
+		// 贴吧模块实例
+		this.tieba = null;
+
 		this.init();
 	}
 
@@ -214,6 +217,207 @@
 		return this;
 	}
 
+	CP.tiebaSign = function(){
+		if(this.tiebaSign && this.tiebaSign.tb_signing){
+			LOG("正在签到，莫闹...","result");
+			return;
+		}
+		this.tieba = new TiebaSign();
+	}
+
+	/**
+	 * 贴吧签到
+	 * @description 可以单独抽出来当插件
+	 */
+	function TiebaSign(){
+
+		// 签到间隔
+		this.delay = 3000;
+
+		// 基础数据请求地址
+		this.baseUrl = "http://tieba.baidu.com/";
+
+		// 签到地址
+		this.signUrl = "http://tieba.baidu.com/sign/add";
+
+		// 贴吧列表
+		this.tb_list = {};
+		this.$tmpList = [];
+		this.$failedList = [];
+
+		// 验证ID
+		this.tb_security_id = null;
+
+		// 验证ID匹配正则，成功的话取最后一个再过字符匹配正则
+		this.tb_security_id_exp = /PageData\.tbs(.*)\=(.*);/;
+		this.tb_security_id_limit_exp = /\w+/;
+
+		// 获取喜欢的贴吧列表
+		this.tb_often_forum_exp = /_\.Module\.use\("spage\/widget\/OftenForum"(.*)\[\[(.*)\]\]\);/;
+
+		// 狗日的服务端编码
+		this.tb_often_kw_exp = /\/f\?kw=.*&fr=index&fp=[0|2]/ig;
+		this.tb_often_kw_exp2 = /kw=(.*?)&/;
+		this.$kw = [];
+
+		// 喜欢的贴吧数量
+		this.tb_len = 0;
+
+		// 签到状态
+		this.tb_signing = false;
+
+		// 失败尝试次数
+		this.tb_try = 3;
+
+		// 开始
+		this.init();
+	}
+
+	/**
+	 * 初始化
+	 * @return {Undefined} 无返回值
+	 */
+	TiebaSign.prototype.init = function(){
+		if(this.tb_signing){
+			return;
+		}
+		this.tb_signing = true;
+		$.get(this.baseUrl)
+			.done(function(re){
+				if(this.getSecurityId(re)){
+					this.getOftenForumList(re);
+					this.doSign();
+				}
+				re = null;
+			}.bind(this))
+			.fail(function(re){
+				LOG("Get base info failed.","error");
+			});
+	}
+
+	/**
+	 * 从页面字符串中获取验证ID
+	 * @param  {String} htm 基础数据请求页面的字符串
+	 * @return {Mix}        获取结果。null则表示获取失败
+	 */
+	TiebaSign.prototype.getSecurityId = function(htm){
+		if(!htm){
+			return;
+		}
+		var tmp = this.tb_security_id_exp.exec(htm);
+		if(tmp){
+			tmp = this.tb_security_id_limit_exp.exec(tmp.pop());
+			tmp = tmp && tmp[0] || null;
+			this.tb_security_id = tmp && tmp.length === 26 && tmp || null;
+		}else{
+			this.tb_security_id = null;
+		}
+		tmp = null;
+		return this.tb_security_id;
+	}
+
+	/**
+	 * 从页面字符串中获取喜欢的贴吧列表
+	 * @param  {String} htm 基础数据请求页面的字符串
+	 * @return {Mix}        获取结果。null则表示获取失败
+	 */
+	TiebaSign.prototype.getOftenForumList = function(htm){
+		if(!htm){
+			return;
+		}
+		var tmp = this.tb_often_forum_exp.exec(htm);
+		tmp = tmp && JSON.parse("["+tmp.pop()+"]") || null;
+		if(tmp){
+			this.tb_len = tmp.length;
+			this.tb_list = {};
+			tmp.forEach(function(item,index){
+				item = {
+					"id":item.forum_id
+					,"name":item.forum_name
+					,"kw":item.forum_name
+					,"sign":item.is_sign
+				}
+				this.tb_list[item.id] = item;
+				if(!item.sign){
+					this.$tmpList.push(item);
+				}
+			}.bind(this));
+		}
+		tmp = null;
+		return this.tb_list;
+	}
+
+	/**
+	 * 签到
+	 * @return {Undefined} 无返回值
+	 */
+	TiebaSign.prototype.doSign = function(){
+		if(!this.$tmpList){
+			return;
+		}
+		_goSign.call(
+			this
+			,this.$tmpList.shift()
+		);
+	}
+
+	/**
+	 * 发起签到请求
+	 * @param   {Object}    data 喜欢的贴吧数据
+	 * @return  {Undefined}      无返回值
+	 * @private
+	 */
+	function _goSign(data){
+		$.post(
+			this.signUrl
+			,{
+				"ie":"utf-8","kw":data.kw,"tbs":this.tb_security_id
+			}
+			,function(re){
+				if(re.error){
+					LOG(data.name+"|"+re.error,"result");
+					// 失败时
+					this.$failedList.push(data);
+				}else{
+					// 成功时
+					this.tb_list[data.id].sign = 1;
+				}
+				_signNext.call(this);
+			}.bind(this)
+			,"json"
+		);
+	}
+
+	/**
+	 * 发起下一个签到请求
+	 * @return  {Undefined}  无返回值
+	 * @private
+	 */
+	function _signNext(){
+		if(this.$tmpList.length){
+			// 延时发送
+			setTimeout(function(){
+				this.doSign();
+			}.bind(this),this.delay);
+		}else{
+			if(this.tb_try && this.$failedList.length){
+				// 有尝试次数且有签到失败的
+				this.tb_try -= 1;
+				// 产生一个新的签到数组
+				this.$tmpList = [].concat(this.$failedList);
+				// 清空失败数组
+				this.$failedList = [];
+				LOG("预计于3秒后尝试重新签到...","result");
+				_signNext.call(this);
+			}else{
+				if(this.$failedList.length){
+					LOG("有些贴吧签到失败了...","result");
+				}
+				this.tb_signing = false;
+			}
+		}
+	}
+
 	function _bindMenu(){
 		this.box.mBnts = this.box.menu.children("div");
 		this.box.mBnts.bind("click",_menuHandler.bind(this));
@@ -228,6 +432,10 @@
 
 			case "custom":
 				LOG("╮(╯▽╰)╭","result");
+			break;
+
+			case "tiebaSign":
+				this.tiebaSign();
 			break;
 
 			case "togglePhalanx":

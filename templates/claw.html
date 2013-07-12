@@ -1,10 +1,17 @@
 <style type="text/css" id="THECEXSECTION_CLAW_CLIENT_BOX_STYLE">
 #THECEXSECTION_CLAW_CLIENT_BOX {
-	top:50%;
+	top:40%;
 	right:-400px;
-	z-index:10086;
 	position:fixed;
+	font-size:12px;
+	/*
+	一些前端从业人员真心一点道德都没有
+	一个公众模块z-index有必要设个999999吗
+	说的就是你们，各种分享到XX的插件！
+	*/
+	z-index:99999999;
 	transition:all .4s ease-in-out;
+	font-family:"Microsoft YaHei",Arial, Helvetica, sans-serif;
 }
 #THECEXSECTION_CLAW_CLIENT_BOX .theToggleBnt {
 
@@ -23,7 +30,7 @@
 	right:5px;
 	top:-22px;
 	opacity:0;
-	min-width:6em;
+	min-width:5.25em;
 	font-size:12px;
 	cursor:pointer;
 	text-align:right;
@@ -38,6 +45,8 @@
 }
 
 #THECEXSECTION_CLAW_CLIENT_BOX .functions p {
+	margin:0;
+	line-height:18px;
 	white-space:nowrap;
 	letter-spacing:.25em;
 }
@@ -71,6 +80,10 @@
 
 #THECEXSECTION_CLAW_CLIENT_BOX:hover .functions > div[data-deg="-45"] {
 	-webkit-transform:rotate(-45deg);
+}
+
+#THECEXSECTION_CLAW_CLIENT_BOX:hover .functions > div[data-deg="-90"] {
+	-webkit-transform:rotate(-90deg);
 }
 
 #THECEXSECTION_CLAW_CLIENT_BOX .ctrlBar {
@@ -112,6 +125,9 @@
 				<textarea></textarea>
 				<input type="button" value="确定" />
 			</div>
+		</div>
+		<div data-deg="-90" data-type="tiebaSign">
+			<p>贴吧签到</p>
 		</div>
 	</section>
 </section>

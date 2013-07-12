@@ -48,6 +48,10 @@
 				"*://*.dev/*"
 				,"*://*.bbspink.com/*"
 				,"*://g-pic.net/search/*"
+
+				// 贴吧
+				,"*://tieba.baidu.com/*"
+
 				// ct
 				,"*://www.400gb.com/*"
 				// jk
