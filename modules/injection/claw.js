@@ -407,7 +407,6 @@
 				this.$tmpList = [].concat(this.$failedList);
 				// 清空失败数组
 				this.$failedList = [];
-				LOG("预计于3秒后尝试重新签到...","result");
 				_signNext.call(this);
 			}else{
 				if(this.$failedList.length){
@@ -418,11 +417,20 @@
 		}
 	}
 
+	/**
+	 * 弹出按钮事件绑定
+	 * @return {Undefined} 无返回值
+	 */
 	function _bindMenu(){
 		this.box.mBnts = this.box.menu.children("div");
 		this.box.mBnts.bind("click",_menuHandler.bind(this));
 	}
 
+	/**
+	 * 事件处理函数
+	 * @param  {Object}    ev 消息对象
+	 * @return {Undefined}    无返回值
+	 */
 	function _menuHandler(ev){
 		var type = $(ev.target).closest("div[data-type]").attr("data-type");
 		switch(type){
