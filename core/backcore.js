@@ -118,19 +118,39 @@
 			/**
 			 * 获取保存在数据库中的所有图片
 			 * @param  {Function}  callback 回调函数
+			 * @param  {String}    type     数据库类型
 			 * @return {Undefined}          无返回值
 			 */
-			,getRecordedImg:function(callback){
+			,getRecordedImg:function(callback,type){
 				// if(!this.DB.db){
 				// 	return false;
 				// }
-				var dbName = this.funcsConfig.imgs.exDb
+				type = type || "exDb";
+				var dbName = this.funcsConfig.imgs[type]
 					,objectStore = this.DB.db.transaction([dbName]).objectStore(dbName)
 					,result = [];
 				objectStore.openCursor().onsuccess = function(ev){
 					var cursor = ev.target.result;
 					if(cursor){
 						result.push(cursor.value);
+						cursor.continue();
+					}else{
+						if(callback){
+							callback(result);
+						}
+					}
+				}
+			}
+			,delPosted:function(callback){
+				var dbName = this.funcsConfig.imgs.posted
+					,objectStore = this.DB.db.transaction([dbName],"readwrite").objectStore(dbName)
+					,result = 0;
+				objectStore.openCursor().onsuccess = function(ev){
+					var cursor = ev.target.result;
+					if(cursor){
+						objectStore.delete(cursor.primaryKey).onsuccess = function(event){
+							result += 1;
+						}
 						cursor.continue();
 					}else{
 						if(callback){
