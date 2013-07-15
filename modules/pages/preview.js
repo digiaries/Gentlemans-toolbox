@@ -139,49 +139,142 @@
 				this.doms.popClose.bind("click",this.hideExports.bind(this));
 
 				// 弹出层保存按钮
-				this.doms.popSave.bind("click",this.save.bind(this));
+				this.doms.popSave.bind("click",function(){
+					this.save();
+				}.bind(this));
 
 				// 隐藏提示
 				this.doms.tip.bind("click",this.hideTip.bind(this));
+
+				// 顶部功能按钮
+				this.doms.expBtns.bind("click",this.expHandler.bind(this));
+			}
+			/**
+			 * 顶部批量功能处理函数
+			 * @param  {Object}    ev 事件对象
+			 * @return {Undefined}    无返回值
+			 */
+			,expHandler:function(ev){
+				var type = $(ev.target).attr("data-type");
+				switch(type){
+					case "saveAll":
+						this.saveAllRecordedImgs();
+					break;
+
+					case "rechkAll":
+						this.chkPostedAndClean();
+					break;
+				}
+			}
+			,saveAllRecordedImgs:function(){
+				var data = _formatRecordData(this.$data,"rechkAllPostedImgs");
+				// 发送
+				this.save(
+					data
+					,function(re){
+						APP.notice({
+							"title":"服务器君正在努力工作"
+							,"msg":re.msg
+						});
+						if(re.ok){
+							re = re.result.items;
+							var beRemove,item;
+							for(var i = 0,len = re.length;i<len;i++){
+								item = re[i];
+								beRemove = this.$data[item.sources][item.key];
+								this.doms.articles[item.key].remove();
+								delete this.doms.articles[item.key];
+								delete this.$data[item.sources][item.key];
+								APP.moveToPostDbByKey(beRemove,item.key);
+							}
+							this.doms.contain.hide();
+							this.doms.expAllBox.hide();
+							this.doms.noData.show();
+							beRemove = item = re = data = null;
+						}
+					}.bind(this)
+					,"damnMuch"
+				);
+			}
+			/**
+			 * 检测已保存的图片
+			 * @return {Undefined} 无返回值
+			 */
+			,chkPostedAndClean:function(){
+				if(confirm("该功能将检测过往保存过的所有图片并将其记录从数据库中删除。\n\n确定要这么做吗？")){
+					// 从数据库中取出所有之前保存过的图片
+					this.getRecord(
+						function(re){
+							// 转格式
+							var data = _formatRecordData(this.formatData(re),"rechkAllPostedImgs");
+
+							// 发送
+							this.save(
+								data
+								,function(re){
+									APP.notice({
+										"title":"服务器君正在努力工作"
+										,"msg":re.msg
+									});
+									APP.delPosted(function(re){
+										console.log("删除了"+re+"条项目");
+									});
+									data = null;
+								}
+								,"rechkPosted"
+							);
+							data = null;
+						}.bind(this)
+						,"posted"
+					);
+				}
 			}
 			/**
 			 * 保存到服务器
 			 * @return {Undefined} 无返回值
 			 */
-			,save:function(){
+			,save:function(data,callback,type){
 				var area = this.doms.popArea;
-				$.post(
-					"http://api.chaoticsea.tk:81"
-					,{
-						"type":"saveImgFiles"
-						,"sources":area.popType.val()
-						,"title":area.title.val()
-						,"key":area.key.val()
-						,"items":area.urls.val().split("\n").toString()
-					}
-					,function(re){
-						APP.notice({
-							"title":"可喜可贺"
-							,"msg":re.msg
-						});
-						if(re.ok){
-							re = re.result.items;
-							this.removeItems(re);
-							this.hideExports();
-							if(util.isEmpty(this.doms.articles)){
-								this.doms.contain.hide();
-								this.doms.expAllBox.hide();
-								this.doms.noData.show();
-							}
-							data = article = chked = beRemove = null;
-						}
+				type = type || "save";
 
-						// doms.articles
-						// @todo 标识已下载的文件。下次预览就不显示了
-					}.bind(this)
+				data = data || {
+					"type":"saveImgFiles"
+					,"sources":area.popType.val()
+					,"title":area.title.val()
+					,"key":area.key.val()
+					,"items":JSON.stringify(area.urls.val().split("\n"))
+				}
+
+				callback = util.isFunc(callback) && callback || function(re){
+					APP.notice({
+						"title":"可喜可贺"
+						,"msg":re.msg
+					});
+					if(re.ok){
+						re = re.result.items;
+						this.removeItems(re);
+						this.hideExports();
+						if(util.isEmpty(this.doms.articles)){
+							this.doms.contain.hide();
+							this.doms.expAllBox.hide();
+							this.doms.noData.show();
+						}
+						re = data = null;
+					}
+				}.bind(this);
+
+				$.post(
+					"http://api.chaoticsea.tk:81?type="+type
+					,data
+					,callback
 				);
 				area = null;
 			}
+			/**
+			 * 删除选中的项目
+			 * @param  {Object}    re 服务端返回的数据
+			 * @return {Undefined}    无返回值
+			 */
 			,removeItems:function(re){
 				var data = this.$data[re.sources][re.key]
 					,article = this.doms.articles[re.key]
@@ -276,17 +369,9 @@
 			 * @return {Undefined}      无返回值
 			 */
 			,setData:function(data){
-				var dat = {}
-				// 生成模块可用的数据
-				data.forEach(function(item){
-					dat[item.type] = dat[item.type] || {};
-					dat[item.type][item.key] = dat[item.type][item.key] || [];
-					dat[item.type][item.key].push(item);
-				});
 				this.$len = data.length;
-				this.$data = dat;
+				this.$data = this.formatData(data);
 				this.build(this.$data);
-				dat = null;
 			}
 			/**
 			 * 构建界面
@@ -306,7 +391,7 @@
 					doms.popSave = doms.pop.find("input[data-type='save']");
 					doms.tip = $("#previewTip");
 					doms.expAllBox = $("#expAllBox");
-					doms.expAll = doms.expAllBox.find("input");
+					doms.expBtns = doms.expAllBox.find("input");
 					doms.noData = $("#noDataBox");
 				}
 
@@ -345,12 +430,24 @@
 			}
 			/**
 			 * 从数据库中获取记录
-			 * @param  {Function}    cb 回调函数
-			 * @return {Undefined}      无返回值
+			 * @param  {Function}    cb   回调函数
+			 * @param  {String}      type 数据库类型
+			 * @return {Undefined}        无返回值
 			 */
-			,getRecord:function(cb){
+			,getRecord:function(cb,type){
 				cb = cb || this.setData;
-				APP.getRecordedImg(cb.bind(this));
+				APP.getRecordedImg(cb.bind(this),type);
+			}
+			,formatData:function(data){
+				var dat = {}
+				// 生成模块可用的数据
+				data.forEach(function(item){
+					dat[item.type] = dat[item.type] || {};
+					dat[item.type][item.key] = dat[item.type][item.key] || [];
+					dat[item.type][item.key].push(item);
+				});
+
+				return dat;
 			}
 		}
 	);
@@ -388,6 +485,33 @@
 		htm.push('<li><textarea data-type="urls"></textarea></li>');
 		htm.push('</ul>');
 		return htm.join("");
+	}
+
+	function _formatRecordData(dat,type){
+		var data = []
+			,tmp;
+		for(var n in dat){
+			for(var m in dat[n]){
+				tmp = {
+					"title":dat[n][m][0].title
+					,"sources":dat[n][m][0].type
+					,"items":[]
+					,"key":dat[n][m][0].key
+				}
+				dat[n][m].forEach(function(it){
+					tmp.items.push(it.url);
+				});
+				tmp.items = tmp.items;
+				data.push(tmp);
+			}
+		}
+		data = {
+			"type":type
+			,"items":data
+		}
+		data.items = JSON.stringify(data.items);
+		tmp = dat = null;
+		return data;
 	}
 
 	window.PV = new Preview();
